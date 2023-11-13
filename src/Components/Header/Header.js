@@ -1,14 +1,25 @@
-import React, { useContext } from 'react';
-
+import React, { useContext, useRef } from 'react';
+import { useNavigate } from 'react-router-dom'
 import './Header.css';
 import OlxLogo from '../../assets/OlxLogo';
 import Search from '../../assets/Search';
 import Arrow from '../../assets/Arrow';
 import SellButton from '../../assets/SellButton';
 import SellButtonPlus from '../../assets/SellButtonPlus';
-import { AuthContext } from '../../store/firebaseContext';
+import { AuthContext, FirebaseContext } from '../../store/firebaseContext';
+import { signOut } from "firebase/auth";
 function Header() {
-  const {user} =useContext(AuthContext)
+  const { user } = useContext(AuthContext)
+  const { auth } = useContext(FirebaseContext)
+  const loginValue = useRef()
+  const navigate = useNavigate()
+
+  const loginHandle = () => {
+    if (loginValue.current.innerText === 'Login') {
+      navigate('/login')
+    }
+  }
+
   return (
     <div className="headerParentDiv">
       <div className="headerChildDiv">
@@ -36,9 +47,17 @@ function Header() {
           <Arrow></Arrow>
         </div>
         <div className="loginPage">
-          <span>{user ? user.displayName : "Login"}</span>
+          <span ref={loginValue} style={{ cursor: 'pointer' }} onClick={loginHandle}>{user ? user.displayName : "Login"}</span>
           <hr />
         </div>
+
+        {user && <span style={{ cursor: 'pointer' }} onClick={() => {
+          signOut(auth).then(() => {
+            navigate('/login')
+          }).catch((error) => {
+            alert('error while signed out')
+          })
+        }}>Logout</span>}
 
         <div className="sellMenu">
           <SellButton></SellButton>
